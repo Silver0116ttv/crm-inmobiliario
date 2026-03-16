@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Inmobiliario</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #F5F3EE;
+  --surface:   #FFFFFF;
+  --surface2:  #F0EDE6;
+  --border:    #E2DDD4;
+  --border2:   #CCC7BC;
+  --text:      #1A1714;
+  --text2:     #6B6560;
+  --text3:     #A09A93;
+  --accent:    #2A5C45;
+  --accent-l:  #EAF2EE;
+  --accent-d:  #1D4132;
+  --amber:     #C07C2A;
+  --amber-l:   #FBF3E6;
+  --red:       #B03A2A;
+  --red-l:     #FAEDEA;
+  --blue:      #2A4A7F;
+  --blue-l:    #EAF0FB;
+  --radius:    10px;
+  --radius-lg: 14px;
+  --shadow:    0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.05);
+  --font:      'DM Sans', sans-serif;
+  --serif:     'DM Serif Display', serif;
+  --sidebar-w: 220px;
+  --topbar-h:  56px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ─── LAYOUT ─── */
+.app { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  transition: transform .25s ease;
+}
+
+.sidebar-logo {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo h1 {
+  font-family: var(--serif);
+  font-size: 17px;
+  color: var(--accent);
+  line-height: 1.2;
+}
+.sidebar-logo p { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+.nav { padding: 12px 10px; flex: 1; overflow-y: auto; }
+.nav-section { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; padding: 10px 10px 4px; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 8px;
+  cursor: pointer; color: var(--text2); font-size: 13.5px;
+  transition: all .15s; margin-bottom: 1px;
+  border: none; background: none; width: 100%; text-align: left;
+}
+.nav-item:hover { background: var(--bg); color: var(--text); }
+.nav-item.active { background: var(--accent-l); color: var(--accent); font-weight: 500; }
+.nav-item .icon { width: 16px; text-align: center; font-size: 14px; flex-shrink: 0; }
+.nav-badge { margin-left: auto; background: var(--accent); color: #fff; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 10px; }
+
+.sidebar-footer {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 12px; color: var(--text3);
+}
+
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.topbar {
+  height: var(--topbar-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 24px; gap: 12px;
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar h2 { font-family: var(--serif); font-size: 20px; flex: 1; }
+.menu-btn {
+  display: none; background: none; border: none;
+  cursor: pointer; font-size: 18px; color: var(--text2);
+  padding: 6px;
+}
+
+.content { padding: 24px; max-width: 1100px; flex: 1; }
+
+/* ─── BUTTONS ─── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px; font-size: 13px;
+  font-family: var(--font); font-weight: 500; cursor: pointer;
+  border: 1px solid transparent; transition: all .15s;
+}
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover { background: var(--accent-d); }
+.btn-outline { background: transparent; border-color: var(--border2); color: var(--text2); }
+.btn-outline:hover { background: var(--bg); color: var(--text); }
+.btn-danger { background: var(--red-l); color: var(--red); border-color: transparent; }
+.btn-danger:hover { background: #f5dbd7; }
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 20px;
+  box-shadow: var(--shadow);
+}
+.card-sm { padding: 14px 16px; }
+
+/* ─── STATS ─── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px 18px;
+}
+.stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+.stat-val { font-family: var(--serif); font-size: 32px; color: var(--text); margin: 4px 0 2px; line-height: 1; }
+.stat-sub { font-size: 12px; color: var(--text3); }
+.stat-accent .stat-val { color: var(--accent); }
+.stat-amber .stat-val { color: var(--amber); }
+
+/* ─── BADGE / TAG ─── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500;
+}
+.badge-green { background: var(--accent-l); color: var(--accent); }
+.badge-amber { background: var(--amber-l); color: var(--amber); }
+.badge-red   { background: var(--red-l);   color: var(--red);   }
+.badge-blue  { background: var(--blue-l);  color: var(--blue);  }
+.badge-gray  { background: var(--surface2); color: var(--text2); }
+
+/* ─── FORMS ─── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-full { grid-column: 1 / -1; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: 12px; font-weight: 500; color: var(--text2); }
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 9px 12px; border: 1px solid var(--border);
+  border-radius: 8px; font-size: 13px; font-family: var(--font);
+  background: var(--bg); color: var(--text);
+  transition: border-color .15s; outline: none;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus { border-color: var(--accent); background: var(--surface); }
+.form-group textarea { resize: vertical; min-height: 72px; }
+.form-group select { cursor: pointer; }
+.form-actions { display: flex; gap: 10px; margin-top: 8px; }
+.req { color: var(--accent); }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(20,16,12,.45);
+  z-index: 200; display: flex; align-items: flex-start;
+  justify-content: center; padding: 40px 16px;
+  overflow-y: auto; opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface); border-radius: var(--radius-lg);
+  width: 100%; max-width: 680px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  transform: translateY(12px); transition: transform .2s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header {
+  padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-header h3 { font-family: var(--serif); font-size: 18px; }
+.modal-close {
+  background: none; border: none; cursor: pointer; font-size: 18px;
+  color: var(--text3); padding: 4px; border-radius: 6px;
+}
+.modal-close:hover { background: var(--bg); }
+.modal-body { padding: 20px 24px; }
+.modal-footer { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+/* ─── TABLE ─── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left; padding: 10px 14px;
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text3);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tbody tr { border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; }
+tbody tr:hover { background: var(--bg); }
+tbody tr:last-child { border-bottom: none; }
+td { padding: 12px 14px; font-size: 13px; vertical-align: middle; }
+td.muted { color: var(--text3); }
+
+/* ─── KANBAN ─── */
+.kanban { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; }
+.kanban-col {
+  min-width: 210px; width: 210px;
+  background: var(--surface2); border-radius: var(--radius-lg);
+  padding: 12px 10px;
+}
+.kanban-col-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 2px 4px 10px; margin-bottom: 2px;
+}
+.kanban-col-title { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; }
+.kanban-count { font-size: 11px; color: var(--text3); background: var(--surface); border-radius: 10px; padding: 1px 7px; }
+.kanban-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px;
+  margin-bottom: 8px; cursor: pointer;
+  transition: box-shadow .15s;
+}
+.kanban-card:hover { box-shadow: var(--shadow); }
+.kanban-card-name { font-weight: 500; font-size: 13px; margin-bottom: 4px; }
+.kanban-card-sub { font-size: 12px; color: var(--text3); }
+.kanban-card-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+
+/* ─── ALERTS ─── */
+.alert {
+  padding: 12px 16px; border-radius: var(--radius); font-size: 13px;
+  display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;
+}
+.alert-amber { background: var(--amber-l); color: var(--amber); border: 1px solid #e8c88a; }
+.alert-red   { background: var(--red-l);   color: var(--red);   border: 1px solid #e8b0a8; }
+.alert-green { background: var(--accent-l); color: var(--accent); border: 1px solid #a8cdb8; }
+
+/* ─── SEARCH ─── */
+.search-bar {
+  display: flex; gap: 10px; align-items: center; margin-bottom: 18px;
+}
+.search-input {
+  flex: 1; padding: 9px 14px; border: 1px solid var(--border);
+  border-radius: 8px; font-size: 13px; font-family: var(--font);
+  background: var(--surface); color: var(--text); outline: none;
+  transition: border-color .15s;
+}
+.search-input:focus { border-color: var(--accent); }
+
+/* ─── EMPTY STATE ─── */
+.empty {
+  text-align: center; padding: 48px 24px; color: var(--text3);
+}
+.empty-icon { font-size: 36px; margin-bottom: 12px; opacity: .5; }
+.empty h4 { font-family: var(--serif); font-size: 18px; color: var(--text2); margin-bottom: 6px; }
+.empty p { font-size: 13px; max-width: 280px; margin: 0 auto 16px; }
+
+/* ─── DETAIL PANEL ─── */
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.detail-item { padding: 10px 14px; background: var(--bg); border-radius: 8px; }
+.detail-item label { font-size: 11px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 3px; }
+.detail-item span { font-size: 13px; color: var(--text); }
+
+/* ─── SECTION HEADER ─── */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.section-header h3 { font-family: var(--serif); font-size: 20px; }
+
+/* ─── PIPELINE MINI ─── */
+.pipeline { display: flex; gap: 0; margin-bottom: 24px; }
+.pipeline-step {
+  flex: 1; text-align: center; padding: 10px 6px;
+  background: var(--surface2); position: relative;
+  font-size: 11px; color: var(--text2); font-weight: 500;
+}
+.pipeline-step:first-child { border-radius: 8px 0 0 8px; }
+.pipeline-step:last-child  { border-radius: 0 8px 8px 0; }
+.pipeline-step .p-val { font-family: var(--serif); font-size: 22px; color: var(--text); display: block; }
+.pipeline-step.active { background: var(--accent-l); color: var(--accent); }
+.pipeline-step.active .p-val { color: var(--accent); }
+
+/* ─── MOBILE OVERLAY ─── */
+.sidebar-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.4); z-index: 99;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    box-shadow: 4px 0 20px rgba(0,0,0,.12);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; }
+  .main { margin-left: 0; }
+  .menu-btn { display: flex; }
+  .content { padding: 16px; }
+  .form-grid, .form-grid.cols3 { grid-template-columns: 1fr; }
+  .form-full { grid-column: 1; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .kanban { padding-bottom: 12px; }
+  .modal-overlay { padding: 16px 12px; }
+  .detail-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .topbar h2 { font-size: 17px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <h1>CRM<br>Inmobiliario</h1>
+    <p>Panel de gestión</p>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Principal</div>
+    <button class="nav-item active" onclick="navigate('dashboard')">
+      <span class="icon">◉</span> Dashboard
+    </button>
+    <button class="nav-item" onclick="navigate('propietarios')">
+      <span class="icon">⌂</span> Propietarios
+    </button>
+    <button class="nav-item" onclick="navigate('inmuebles')">
+      <span class="icon">▦</span> Inmuebles
+    </button>
+    <button class="nav-item" onclick="navigate('inquilinos')">
+      <span class="icon">◈</span> Inquilinos / Leads
+    </button>
+    <div class="nav-section">Operación</div>
+    <button class="nav-item" onclick="navigate('embudo')">
+      <span class="icon">⟁</span> Embudo de ventas
+    </button>
+    <button class="nav-item" onclick="navigate('contratos')">
+      <span class="icon">◻</span> Contratos
+    </button>
+    <div class="nav-section">Finanzas</div>
+    <button class="nav-item" onclick="navigate('ingresos')">
+      <span class="icon">◎</span> Ingresos
+    </button>
+  </nav>
+  <div class="sidebar-footer">v1.0 · Datos guardados localmente</div>
+</aside>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ─── MAIN ─── -->
+<main class="main">
+  <header class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <h2 id="topbar-title">Dashboard</h2>
+    <div id="topbar-actions"></div>
+  </header>
+  <div class="content" id="content"></div>
+</main>
+</div>
+
+<!-- ─── MODAL ─── -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Título</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   DATA STORE — localStorage persistence
+══════════════════════════════════════════ */
+const DB = {
+  load(key) { try { return JSON.parse(localStorage.getItem('crm_'+key)) || []; } catch(e){ return []; } },
+  save(key, data) { localStorage.setItem('crm_'+key, JSON.stringify(data)); },
+  get propietarios() { return this.load('propietarios'); },
+  set propietarios(v) { this.save('propietarios', v); },
+  get inquilinos() { return this.load('inquilinos'); },
+  set inquilinos(v) { this.save('inquilinos', v); },
+  get inmuebles() { return this.load('inmuebles'); },
+  set inmuebles(v) { this.save('inmuebles', v); },
+  get contratos() { return this.load('contratos'); },
+  set contratos(v) { this.save('contratos', v); },
+  get ingresos() { return this.load('ingresos'); },
+  set ingresos(v) { this.save('ingresos', v); },
+};
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function fmtMXN(n) { return '$' + (Number(n)||0).toLocaleString('es-MX'); }
+function fmtDate(d) { if(!d) return '—'; const p = d.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
+function today() { return new Date().toISOString().slice(0,10); }
+function daysUntil(d) { if(!d) return null; return Math.round((new Date(d)-new Date())/86400000); }
+
+/* ══════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════ */
+let currentView = 'dashboard';
+
+function navigate(view) {
+  currentView = view;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if(n.getAttribute('onclick')?.includes("'"+view+"'")) n.classList.add('active');
+  });
+  updateBadges();
+  closeSidebar();
+  const titles = { dashboard:'Dashboard', propietarios:'Propietarios', inmuebles:'Inmuebles', inquilinos:'Inquilinos / Leads', embudo:'Embudo de ventas', contratos:'Contratos', ingresos:'Ingresos' };
+  document.getElementById('topbar-title').textContent = titles[view] || view;
+  const renders = { dashboard: renderDashboard, propietarios: renderPropietarios, inmuebles: renderInmuebles, inquilinos: renderInquilinos, embudo: renderEmbudo, contratos: renderContratos, ingresos: renderIngresos };
+  if(renders[view]) renders[view]();
+}
+
+function updateBadges() {
+  // contratos por vencer
+  const hoy = new Date();
+  const porVencer = DB.contratos.filter(c => {
+    const d = daysUntil(c.vencimiento);
+    return d !== null && d >= 0 && d <= 30;
+  }).length;
+  // leads sin seguimiento (nuevos)
+  const leads = DB.inquilinos.filter(i => i.etapa === 'nuevo').length;
+}
+
+/* ─── sidebar mobile ─── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+/* ══════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════ */
+let onModalSave = null;
+
+function openModal(title, bodyHTML, footerHTML, onSave) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHTML;
+  document.getElementById('modal-footer').innerHTML = footerHTML || `
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="modalSave()">Guardar</button>
+  `;
+  onModalSave = onSave;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); onModalSave = null; }
+function modalSave() { if(onModalSave) onModalSave(); }
+function handleOverlayClick(e) { if(e.target === e.currentTarget) closeModal(); }
+
+/* ══════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════ */
+function renderDashboard() {
+  document.getElementById('topbar-actions').innerHTML = '';
+  const props = DB.propietarios;
+  const inqs  = DB.inquilinos;
+  const inms  = DB.inmuebles;
+  const cons  = DB.contratos;
+  const ings  = DB.ingresos;
+
+  const inmDisp   = inms.filter(i => i.estado === 'disponible').length;
+  const inmRentad = inms.filter(i => i.estado === 'rentado').length;
+  const totalIngs = ings.reduce((s,i) => s + (Number(i.monto)||0), 0);
+  const cierresMes = ings.filter(i => i.tipo === 'comision' && i.fecha?.startsWith(new Date().toISOString().slice(0,7))).length;
+
+  // alertas
+  const porVencer = cons.filter(c => { const d = daysUntil(c.vencimiento); return d !== null && d >= 0 && d <= 30; });
+  const nuevosLeads = inqs.filter(i => i.etapa === 'nuevo');
+
+  let alertas = '';
+  porVencer.forEach(c => {
+    const d = daysUntil(c.vencimiento);
+    alertas += `<div class="alert alert-amber">⚠ Contrato de <strong>${c.inquilino_nombre||'inquilino'}</strong> vence en <strong>${d} días</strong> — <a href="#" onclick="navigate('contratos')" style="color:inherit">ver contrato</a></div>`;
+  });
+  nuevosLeads.slice(0,2).forEach(l => {
+    alertas += `<div class="alert alert-blue" style="background:var(--blue-l);color:var(--blue);border-color:#aac0e8">◈ Lead nuevo sin seguimiento: <strong>${l.nombre}</strong> — presupuesto ${fmtMXN(l.presupuesto)}</div>`;
+  });
+  if(!alertas) alertas = `<div class="alert alert-green">✓ Todo en orden · Sin alertas pendientes</div>`;
+
+  // embudo resumen
+  const etapas = ['nuevo','calificado','visita','negociacion','cerrado'];
+  const etNombres = { nuevo:'Nuevos', calificado:'Calificados', visita:'Visitas', negociacion:'Negoc.', cerrado:'Cerrados' };
+  let pipeSteps = etapas.map(e => {
+    const cnt = inqs.filter(i => i.etapa === e).length;
+    return `<div class="pipeline-step ${e==='cerrado'?'active':''}">
+      <span class="p-val">${cnt}</span>${etNombres[e]}
+    </div>`;
+  }).join('');
+
+  // actividad reciente
+  const allActivity = [
+    ...props.map(p => ({ fecha: p.fecha_creacion, texto: `Propietario registrado: ${p.nombre}`, tipo:'prop' })),
+    ...inqs.map(i => ({ fecha: i.fecha_creacion, texto: `Lead registrado: ${i.nombre}`, tipo:'lead' })),
+    ...cons.map(c => ({ fecha: c.fecha_inicio, texto: `Contrato firmado: ${c.inquilino_nombre}`, tipo:'contrato' })),
+    ...ings.map(g => ({ fecha: g.fecha, texto: `Ingreso: ${fmtMXN(g.monto)} · ${g.concepto}`, tipo:'ingreso' })),
+  ].filter(a => a.fecha).sort((a,b) => b.fecha.localeCompare(a.fecha)).slice(0,6);
+
+  let actHTML = allActivity.length ? allActivity.map(a => `
+    <tr><td><span style="font-size:12px;color:var(--text3)">${fmtDate(a.fecha)}</span></td>
+    <td>${a.texto}</td></tr>
+  `).join('') : `<tr><td colspan="2" class="muted" style="text-align:center;padding:24px">Sin actividad registrada aún</td></tr>`;
+
+  document.getElementById('content').innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card stat-accent">
+        <div class="stat-label">Inmuebles activos</div>
+        <div class="stat-val">${inms.length}</div>
+        <div class="stat-sub">${inmDisp} disponibles · ${inmRentad} rentados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Propietarios</div>
+        <div class="stat-val">${props.length}</div>
+        <div class="stat-sub">Clientes registrados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Leads activos</div>
+        <div class="stat-val">${inqs.filter(i=>i.etapa!=='cerrado'&&i.etapa!=='perdido').length}</div>
+        <div class="stat-sub">${nuevosLeads.length} nuevos sin atender</div>
+      </div>
+      <div class="stat-card stat-amber">
+        <div class="stat-label">Ingresos totales</div>
+        <div class="stat-val">${fmtMXN(totalIngs)}</div>
+        <div class="stat-sub">${cierresMes} cierre(s) este mes</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:24px">
+      <div class="section-header" style="margin-bottom:10px"><h3>Alertas</h3></div>
+      ${alertas}
+    </div>
+
+    <div style="margin-bottom:24px">
+      <div class="section-header" style="margin-bottom:10px"><h3>Embudo actual</h3></div>
+      <div class="pipeline">${pipeSteps}</div>
+    </div>
+
+    <div class="card">
+      <div class="section-header" style="margin-bottom:14px"><h3>Actividad reciente</h3></div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Fecha</th><th>Evento</th></tr></thead>
+        <tbody>${actHTML}</tbody></table>
+      </div>
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════════════
+   PROPIETARIOS
+══════════════════════════════════════════ */
+function renderPropietarios(search='') {
+  document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary btn-sm" onclick="modalNuevoPropietario()">+ Nuevo propietario</button>`;
+  let data = DB.propietarios;
+  if(search) data = data.filter(p => [p.nombre,p.telefono,p.email].join(' ').toLowerCase().includes(search.toLowerCase()));
+
+  let rows = data.length ? data.map(p => {
+    const inms = DB.inmuebles.filter(i => i.propietario_id === p.id);
+    const tipo = p.acuerdo === 'administracion' ? '<span class="badge badge-green">Adm. mensual</span>' : '<span class="badge badge-gray">Solo cierre</span>';
+    return `<tr onclick="verPropietario('${p.id}')">
+      <td><strong>${p.nombre}</strong></td>
+      <td class="muted">${p.telefono||'—'}</td>
+      <td class="muted">${p.email||'—'}</td>
+      <td>${inms.length} inmueble${inms.length!==1?'s':''}</td>
+      <td>${tipo}</td>
+      <td class="muted">${fmtDate(p.fecha_creacion)}</td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="6"><div class="empty"><div class="empty-icon">⌂</div><h4>Sin propietarios</h4><p>Registra tu primer propietario para empezar</p></div></td></tr>`;
+
+  document.getElementById('content').innerHTML = `
+    <div class="search-bar">
+      <input class="search-input" placeholder="Buscar propietario..." oninput="renderPropietarios(this.value)" value="${search}">
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nombre</th><th>Teléfono</th><th>Email</th><th>Inmuebles</th><th>Acuerdo</th><th>Registrado</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function modalNuevoPropietario(id=null) {
+  const p = id ? DB.propietarios.find(x=>x.id===id) : {};
+  openModal(id ? 'Editar propietario' : 'Nuevo propietario', `
+    <div class="form-grid">
+      <div class="form-group form-full">
+        <label>Nombre completo <span class="req">*</span></label>
+        <input id="f-nombre" value="${p.nombre||''}" placeholder="Ej. Carlos Mendoza">
+      </div>
+      <div class="form-group">
+        <label>Teléfono / WhatsApp <span class="req">*</span></label>
+        <input id="f-tel" value="${p.telefono||''}" placeholder="33 1234 5678">
+      </div>
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input id="f-email" type="email" value="${p.email||''}" placeholder="correo@ejemplo.com">
+      </div>
+      <div class="form-group">
+        <label>RFC</label>
+        <input id="f-rfc" value="${p.rfc||''}" placeholder="MECC800101XXX">
+      </div>
+      <div class="form-group">
+        <label>Tipo de acuerdo <span class="req">*</span></label>
+        <select id="f-acuerdo">
+          <option value="cierre" ${p.acuerdo==='cierre'?'selected':''}>Solo cierre</option>
+          <option value="administracion" ${p.acuerdo==='administracion'?'selected':''}>Administración mensual</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Comisión acordada (%)</label>
+        <input id="f-comision" type="number" value="${p.comision||''}" placeholder="10">
+      </div>
+      <div class="form-group">
+        <label>¿Cómo nos conoció?</label>
+        <select id="f-fuente">
+          <option value="" ${!p.fuente?'selected':''}>— Selecciona —</option>
+          <option value="referido" ${p.fuente==='referido'?'selected':''}>Referido</option>
+          <option value="portal" ${p.fuente==='portal'?'selected':''}>Portal inmobiliario</option>
+          <option value="redes" ${p.fuente==='redes'?'selected':''}>Redes sociales</option>
+          <option value="whatsapp" ${p.fuente==='whatsapp'?'selected':''}>WhatsApp</option>
+          <option value="otro" ${p.fuente==='otro'?'selected':''}>Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Próximo contacto</label>
+        <input id="f-contacto" type="date" value="${p.proximo_contacto||''}">
+      </div>
+      <div class="form-group form-full">
+        <label>Notas</label>
+        <textarea id="f-notas" placeholder="Observaciones privadas...">${p.notas||''}</textarea>
+      </div>
+    </div>`, null, () => {
+    const nombre = document.getElementById('f-nombre').value.trim();
+    const tel    = document.getElementById('f-tel').value.trim();
+    if(!nombre||!tel) { alert('Nombre y teléfono son obligatorios'); return; }
+    const obj = {
+      id: id||uid(), nombre, telefono: tel,
+      email: document.getElementById('f-email').value.trim(),
+      rfc: document.getElementById('f-rfc').value.trim(),
+      acuerdo: document.getElementById('f-acuerdo').value,
+      comision: document.getElementById('f-comision').value,
+      fuente: document.getElementById('f-fuente').value,
+      proximo_contacto: document.getElementById('f-contacto').value,
+      notas: document.getElementById('f-notas').value.trim(),
+      fecha_creacion: id ? (p.fecha_creacion||today()) : today(),
+    };
+    let arr = DB.propietarios;
+    if(id) arr = arr.map(x => x.id===id ? obj : x);
+    else arr.push(obj);
+    DB.propietarios = arr;
+    closeModal();
+    renderPropietarios();
+  });
+}
+
+function verPropietario(id) {
+  const p = DB.propietarios.find(x => x.id === id);
+  if(!p) return;
+  const inms = DB.inmuebles.filter(i => i.propietario_id === id);
+  const inmsHTML = inms.length ? inms.map(i => `
+    <div class="kanban-card" style="margin-bottom:8px" onclick="navigate('inmuebles')">
+      <div class="kanban-card-name">${i.direccion}</div>
+      <div class="kanban-card-sub">${fmtMXN(i.precio)}/mes · <span class="badge badge-${i.estado==='disponible'?'green':i.estado==='rentado'?'amber':'gray'}">${i.estado}</span></div>
+    </div>`).join('') : '<p style="color:var(--text3);font-size:13px">Sin inmuebles registrados aún</p>';
+
+  openModal(`Propietario: ${p.nombre}`, `
+    <div class="detail-grid" style="margin-bottom:16px">
+      <div class="detail-item"><label>Teléfono</label><span>${p.telefono||'—'}</span></div>
+      <div class="detail-item"><label>Email</label><span>${p.email||'—'}</span></div>
+      <div class="detail-item"><label>RFC</label><span>${p.rfc||'—'}</span></div>
+      <div class="detail-item"><label>Acuerdo</label><span>${p.acuerdo==='administracion'?'Administración mensual':'Solo cierre'}</span></div>
+      <div class="detail-item"><label>Comisión</label><span>${p.comision||'—'}%</span></div>
+      <div class="detail-item"><label>Fuente</label><span>${p.fuente||'—'}</span></div>
+      <div class="detail-item"><label>Próximo contacto</label><span>${fmtDate(p.proximo_contacto)}</span></div>
+      <div class="detail-item"><label>Registrado</label><span>${fmtDate(p.fecha_creacion)}</span></div>
+      ${p.notas ? `<div class="detail-item form-full" style="grid-column:1/-1"><label>Notas</label><span>${p.notas}</span></div>` : ''}
+    </div>
+    <div><strong style="font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em">Inmuebles vinculados</strong><div style="margin-top:10px">${inmsHTML}</div></div>
+  `, `
+    <button class="btn btn-danger btn-sm" onclick="eliminarPropietario('${id}')">Eliminar</button>
+    <button class="btn btn-outline btn-sm" onclick="closeModal()">Cerrar</button>
+    <button class="btn btn-primary btn-sm" onclick="closeModal();modalNuevoPropietario('${id}')">Editar</button>
+  `, null);
+}
+
+function eliminarPropietario(id) {
+  if(!confirm('¿Eliminar este propietario?')) return;
+  DB.propietarios = DB.propietarios.filter(x => x.id !== id);
+  closeModal(); renderPropietarios();
+}
+
+/* ══════════════════════════════════════════
+   INMUEBLES
+══════════════════════════════════════════ */
+function renderInmuebles(search='') {
+  document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary btn-sm" onclick="modalNuevoInmueble()">+ Nuevo inmueble</button>`;
+  let data = DB.inmuebles;
+  if(search) data = data.filter(i => [i.direccion,i.tipo,i.colonia].join(' ').toLowerCase().includes(search.toLowerCase()));
+
+  const estadoBadge = e => ({ disponible:'badge-green', rentado:'badge-amber', 'en proceso':'badge-blue', inactivo:'badge-gray' })[e]||'badge-gray';
+
+  let rows = data.length ? data.map(i => {
+    const prop = DB.propietarios.find(p => p.id === i.propietario_id);
+    return `<tr onclick="verInmueble('${i.id}')">
+      <td><strong>${i.direccion}</strong><br><span style="font-size:11px;color:var(--text3)">${i.colonia||''}</span></td>
+      <td class="muted">${i.tipo||'—'}</td>
+      <td>${fmtMXN(i.precio)}<span style="font-size:11px;color:var(--text3)">/mes</span></td>
+      <td>${i.recamaras||'—'} rec · ${i.banos||'—'} baños</td>
+      <td><span class="badge ${estadoBadge(i.estado)}">${i.estado||'disponible'}</span></td>
+      <td class="muted">${prop ? prop.nombre : '—'}</td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="6"><div class="empty"><div class="empty-icon">▦</div><h4>Sin inmuebles</h4><p>Agrega el primer inmueble de tu catálogo</p><button class="btn btn-primary" onclick="modalNuevoInmueble()">+ Agregar</button></div></td></tr>`;
+
+  document.getElementById('content').innerHTML = `
+    <div class="search-bar">
+      <input class="search-input" placeholder="Buscar por dirección, tipo, colonia..." oninput="renderInmuebles(this.value)" value="${search}">
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Dirección</th><th>Tipo</th><th>Precio</th><th>Características</th><th>Estado</th><th>Propietario</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function modalNuevoInmueble(id=null) {
+  const inm = id ? DB.inmuebles.find(x=>x.id===id) : {};
+  const props = DB.propietarios;
+  const propOpts = props.map(p => `<option value="${p.id}" ${inm.propietario_id===p.id?'selected':''}>${p.nombre}</option>`).join('');
+
+  openModal(id ? 'Editar inmueble' : 'Nuevo inmueble', `
+    <div class="form-grid">
+      <div class="form-group form-full">
+        <label>Dirección completa <span class="req">*</span></label>
+        <input id="f-dir" value="${inm.direccion||''}" placeholder="Calle, número, piso">
+      </div>
+      <div class="form-group">
+        <label>Colonia</label>
+        <input id="f-col" value="${inm.colonia||''}" placeholder="Ej. Providencia">
+      </div>
+      <div class="form-group">
+        <label>Tipo <span class="req">*</span></label>
+        <select id="f-tipo">
+          <option value="departamento" ${inm.tipo==='departamento'?'selected':''}>Departamento</option>
+          <option value="casa" ${inm.tipo==='casa'?'selected':''}>Casa</option>
+          <option value="local" ${inm.tipo==='local'?'selected':''}>Local comercial</option>
+          <option value="oficina" ${inm.tipo==='oficina'?'selected':''}>Oficina</option>
+          <option value="bodega" ${inm.tipo==='bodega'?'selected':''}>Bodega</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Propietario vinculado <span class="req">*</span></label>
+        <select id="f-prop">${props.length ? '<option value="">— Selecciona —</option>'+propOpts : '<option value="">Sin propietarios registrados</option>'}</select>
+      </div>
+      <div class="form-group">
+        <label>Precio de renta ($/mes) <span class="req">*</span></label>
+        <input id="f-precio" type="number" value="${inm.precio||''}" placeholder="8000">
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select id="f-estado">
+          <option value="disponible" ${inm.estado==='disponible'||!inm.estado?'selected':''}>Disponible</option>
+          <option value="en proceso" ${inm.estado==='en proceso'?'selected':''}>En proceso</option>
+          <option value="rentado" ${inm.estado==='rentado'?'selected':''}>Rentado</option>
+          <option value="inactivo" ${inm.estado==='inactivo'?'selected':''}>Inactivo</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Recámaras</label>
+        <input id="f-rec" type="number" value="${inm.recamaras||''}" placeholder="2">
+      </div>
+      <div class="form-group">
+        <label>Baños</label>
+        <input id="f-banos" type="number" value="${inm.banos||''}" placeholder="1">
+      </div>
+      <div class="form-group">
+        <label>m² totales</label>
+        <input id="f-m2" type="number" value="${inm.m2||''}" placeholder="70">
+      </div>
+      <div class="form-group">
+        <label>Meses de depósito</label>
+        <input id="f-deposito" type="number" value="${inm.deposito||''}" placeholder="1">
+      </div>
+      <div class="form-group">
+        <label>Estacionamiento</label>
+        <select id="f-estac">
+          <option value="no" ${inm.estacionamiento==='no'||!inm.estacionamiento?'selected':''}>No</option>
+          <option value="1" ${inm.estacionamiento==='1'?'selected':''}>1 cajón</option>
+          <option value="2" ${inm.estacionamiento==='2'?'selected':''}>2 cajones</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>¿Amueblado?</label>
+        <select id="f-amueblado">
+          <option value="no" ${inm.amueblado==='no'||!inm.amueblado?'selected':''}>Sin amueble</option>
+          <option value="parcial" ${inm.amueblado==='parcial'?'selected':''}>Parcialmente</option>
+          <option value="si" ${inm.amueblado==='si'?'selected':''}>Completamente</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Mascotas permitidas</label>
+        <select id="f-mascotas">
+          <option value="no" ${inm.mascotas==='no'||!inm.mascotas?'selected':''}>No</option>
+          <option value="si" ${inm.mascotas==='si'?'selected':''}>Sí</option>
+          <option value="negociable" ${inm.mascotas==='negociable'?'selected':''}>Negociable</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Disponible desde</label>
+        <input id="f-disponible" type="date" value="${inm.disponible_desde||''}">
+      </div>
+      <div class="form-group form-full">
+        <label>Notas / descripción</label>
+        <textarea id="f-notas" placeholder="Características adicionales, condiciones especiales...">${inm.notas||''}</textarea>
+      </div>
+    </div>`, null, () => {
+    const dir    = document.getElementById('f-dir').value.trim();
+    const precio = document.getElementById('f-precio').value;
+    const propId = document.getElementById('f-prop').value;
+    if(!dir||!precio) { alert('Dirección y precio son obligatorios'); return; }
+    const obj = {
+      id: id||uid(), direccion: dir,
+      colonia: document.getElementById('f-col').value.trim(),
+      tipo: document.getElementById('f-tipo').value,
+      propietario_id: propId,
+      precio: Number(precio),
+      estado: document.getElementById('f-estado').value,
+      recamaras: document.getElementById('f-rec').value,
+      banos: document.getElementById('f-banos').value,
+      m2: document.getElementById('f-m2').value,
+      deposito: document.getElementById('f-deposito').value,
+      estacionamiento: document.getElementById('f-estac').value,
+      amueblado: document.getElementById('f-amueblado').value,
+      mascotas: document.getElementById('f-mascotas').value,
+      disponible_desde: document.getElementById('f-disponible').value,
+      notas: document.getElementById('f-notas').value.trim(),
+      fecha_creacion: id ? (inm.fecha_creacion||today()) : today(),
+    };
+    let arr = DB.inmuebles;
+    if(id) arr = arr.map(x => x.id===id ? obj : x);
+    else arr.push(obj);
+    DB.inmuebles = arr;
+    closeModal(); renderInmuebles();
+  });
+}
+
+function verInmueble(id) {
+  const inm = DB.inmuebles.find(x => x.id === id);
+  if(!inm) return;
+  const prop = DB.propietarios.find(p => p.id === inm.propietario_id);
+  const estadoBadge = { disponible:'badge-green', rentado:'badge-amber', 'en proceso':'badge-blue', inactivo:'badge-gray' }[inm.estado]||'badge-gray';
+  openModal(`Inmueble: ${inm.direccion}`, `
+    <div style="margin-bottom:12px"><span class="badge ${estadoBadge}">${inm.estado||'disponible'}</span></div>
+    <div class="detail-grid">
+      <div class="detail-item"><label>Precio</label><span>${fmtMXN(inm.precio)}/mes</span></div>
+      <div class="detail-item"><label>Tipo</label><span>${inm.tipo||'—'}</span></div>
+      <div class="detail-item"><label>Propietario</label><span>${prop?prop.nombre:'—'}</span></div>
+      <div class="detail-item"><label>Colonia</label><span>${inm.colonia||'—'}</span></div>
+      <div class="detail-item"><label>Recámaras</label><span>${inm.recamaras||'—'}</span></div>
+      <div class="detail-item"><label>Baños</label><span>${inm.banos||'—'}</span></div>
+      <div class="detail-item"><label>m²</label><span>${inm.m2||'—'}</span></div>
+      <div class="detail-item"><label>Depósito</label><span>${inm.deposito||'—'} mes(es)</span></div>
+      <div class="detail-item"><label>Estacionamiento</label><span>${inm.estacionamiento||'—'}</span></div>
+      <div class="detail-item"><label>Amueblado</label><span>${inm.amueblado||'—'}</span></div>
+      <div class="detail-item"><label>Mascotas</label><span>${inm.mascotas||'—'}</span></div>
+      <div class="detail-item"><label>Disponible desde</label><span>${fmtDate(inm.disponible_desde)}</span></div>
+      ${inm.notas ? `<div class="detail-item" style="grid-column:1/-1"><label>Notas</label><span>${inm.notas}</span></div>` : ''}
+    </div>
+  `, `
+    <button class="btn btn-danger btn-sm" onclick="eliminarInmueble('${id}')">Eliminar</button>
+    <button class="btn btn-outline btn-sm" onclick="closeModal()">Cerrar</button>
+    <button class="btn btn-primary btn-sm" onclick="closeModal();modalNuevoInmueble('${id}')">Editar</button>
+  `, null);
+}
+
+function eliminarInmueble(id) {
+  if(!confirm('¿Eliminar este inmueble?')) return;
+  DB.inmuebles = DB.inmuebles.filter(x => x.id !== id);
+  closeModal(); renderInmuebles();
+}
+
+/* ══════════════════════════════════════════
+   INQUILINOS / LEADS
+══════════════════════════════════════════ */
+function renderInquilinos(search='') {
+  document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary btn-sm" onclick="modalNuevoInquilino()">+ Nuevo lead</button>`;
+  let data = DB.inquilinos;
+  if(search) data = data.filter(i => [i.nombre,i.telefono,i.email].join(' ').toLowerCase().includes(search.toLowerCase()));
+
+  const etBadge = { nuevo:'badge-gray', calificado:'badge-blue', visita:'badge-amber', negociacion:'badge-amber', cerrado:'badge-green', perdido:'badge-red' };
+  const etLabel = { nuevo:'Nuevo', calificado:'Calificado', visita:'Visita agenda.', negociacion:'Negociando', cerrado:'Cerrado', perdido:'Perdido' };
+
+  let rows = data.length ? data.map(i => {
+    return `<tr onclick="verInquilino('${i.id}')">
+      <td><strong>${i.nombre}</strong></td>
+      <td class="muted">${i.telefono||'—'}</td>
+      <td>${fmtMXN(i.presupuesto)}<span style="font-size:11px;color:var(--text3)">/mes</span></td>
+      <td class="muted">${i.zonas||'—'}</td>
+      <td><span class="badge ${etBadge[i.etapa]||'badge-gray'}">${etLabel[i.etapa]||i.etapa||'Nuevo'}</span></td>
+      <td class="muted">${fmtDate(i.fecha_entrada)}</td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="6"><div class="empty"><div class="empty-icon">◈</div><h4>Sin leads</h4><p>Registra tus primeros prospectos</p><button class="btn btn-primary" onclick="modalNuevoInquilino()">+ Agregar</button></div></td></tr>`;
+
+  document.getElementById('content').innerHTML = `
+    <div class="search-bar">
+      <input class="search-input" placeholder="Buscar lead..." oninput="renderInquilinos(this.value)" value="${search}">
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nombre</th><th>Teléfono</th><th>Presupuesto</th><th>Zonas de interés</th><th>Etapa</th><th>Entrada</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function modalNuevoInquilino(id=null) {
+  const inq = id ? DB.inquilinos.find(x=>x.id===id) : {};
+  openModal(id ? 'Editar lead' : 'Nuevo lead / Inquilino', `
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre completo <span class="req">*</span></label>
+        <input id="f-nombre" value="${inq.nombre||''}" placeholder="Nombre completo">
+      </div>
+      <div class="form-group">
+        <label>Teléfono / WhatsApp <span class="req">*</span></label>
+        <input id="f-tel" value="${inq.telefono||''}" placeholder="33 1234 5678">
+      </div>
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input id="f-email" type="email" value="${inq.email||''}" placeholder="correo@ejemplo.com">
+      </div>
+      <div class="form-group">
+        <label>Ocupación</label>
+        <input id="f-ocup" value="${inq.ocupacion||''}" placeholder="Empleado, independiente...">
+      </div>
+      <div class="form-group">
+        <label>Presupuesto máximo ($/mes) <span class="req">*</span></label>
+        <input id="f-presup" type="number" value="${inq.presupuesto||''}" placeholder="8000">
+      </div>
+      <div class="form-group">
+        <label>Fecha de entrada deseada</label>
+        <input id="f-entrada" type="date" value="${inq.fecha_entrada||''}">
+      </div>
+      <div class="form-group form-full">
+        <label>Zonas de interés</label>
+        <input id="f-zonas" value="${inq.zonas||''}" placeholder="Ej. Providencia, Chapalita, Zapopan Centro">
+      </div>
+      <div class="form-group">
+        <label>Recámaras mínimas</label>
+        <input id="f-rec" type="number" value="${inq.recamaras||''}" placeholder="2">
+      </div>
+      <div class="form-group">
+        <label>Tipo de inmueble</label>
+        <select id="f-tipo">
+          <option value="" ${!inq.tipo?'selected':''}>— Cualquiera —</option>
+          <option value="departamento" ${inq.tipo==='departamento'?'selected':''}>Departamento</option>
+          <option value="casa" ${inq.tipo==='casa'?'selected':''}>Casa</option>
+          <option value="local" ${inq.tipo==='local'?'selected':''}>Local comercial</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>¿Tiene mascotas?</label>
+        <select id="f-mascotas">
+          <option value="no" ${inq.mascotas==='no'||!inq.mascotas?'selected':''}>No</option>
+          <option value="si" ${inq.mascotas==='si'?'selected':''}>Sí</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>¿Tiene aval?</label>
+        <select id="f-aval">
+          <option value="si" ${inq.aval==='si'?'selected':''}>Sí</option>
+          <option value="no" ${inq.aval==='no'?'selected':''}>No</option>
+          <option value="tramite" ${inq.aval==='tramite'?'selected':''}>En trámite</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Ingresos mensuales aprox.</label>
+        <input id="f-ingresos" type="number" value="${inq.ingresos||''}" placeholder="20000">
+      </div>
+      <div class="form-group">
+        <label>Etapa en embudo</label>
+        <select id="f-etapa">
+          <option value="nuevo" ${inq.etapa==='nuevo'||!inq.etapa?'selected':''}>Nuevo lead</option>
+          <option value="calificado" ${inq.etapa==='calificado'?'selected':''}>Calificado</option>
+          <option value="visita" ${inq.etapa==='visita'?'selected':''}>Visita agendada</option>
+          <option value="negociacion" ${inq.etapa==='negociacion'?'selected':''}>En negociación</option>
+          <option value="cerrado" ${inq.etapa==='cerrado'?'selected':''}>Contrato firmado</option>
+          <option value="perdido" ${inq.etapa==='perdido'?'selected':''}>Perdido</option>
+        </select>
+      </div>
+      <div class="form-group form-full">
+        <label>Notas</label>
+        <textarea id="f-notas" placeholder="Observaciones, preferencias específicas...">${inq.notas||''}</textarea>
+      </div>
+    </div>`, null, () => {
+    const nombre  = document.getElementById('f-nombre').value.trim();
+    const tel     = document.getElementById('f-tel').value.trim();
+    const presup  = document.getElementById('f-presup').value;
+    if(!nombre||!tel) { alert('Nombre y teléfono son obligatorios'); return; }
+    const obj = {
+      id: id||uid(), nombre, telefono: tel,
+      email: document.getElementById('f-email').value.trim(),
+      ocupacion: document.getElementById('f-ocup').value.trim(),
+      presupuesto: Number(presup)||0,
+      fecha_entrada: document.getElementById('f-entrada').value,
+      zonas: document.getElementById('f-zonas').value.trim(),
+      recamaras: document.getElementById('f-rec').value,
+      tipo: document.getElementById('f-tipo').value,
+      mascotas: document.getElementById('f-mascotas').value,
+      aval: document.getElementById('f-aval').value,
+      ingresos: document.getElementById('f-ingresos').value,
+      etapa: document.getElementById('f-etapa').value,
+      notas: document.getElementById('f-notas').value.trim(),
+      fecha_creacion: id ? (inq.fecha_creacion||today()) : today(),
+    };
+    let arr = DB.inquilinos;
+    if(id) arr = arr.map(x => x.id===id ? obj : x);
+    else arr.push(obj);
+    DB.inquilinos = arr;
+    closeModal(); renderInquilinos();
+  });
+}
+
+function verInquilino(id) {
+  const inq = DB.inquilinos.find(x => x.id === id);
+  if(!inq) return;
+  openModal(`Lead: ${inq.nombre}`, `
+    <div class="detail-grid">
+      <div class="detail-item"><label>Teléfono</label><span>${inq.telefono||'—'}</span></div>
+      <div class="detail-item"><label>Email</label><span>${inq.email||'—'}</span></div>
+      <div class="detail-item"><label>Presupuesto</label><span>${fmtMXN(inq.presupuesto)}/mes</span></div>
+      <div class="detail-item"><label>Entrada</label><span>${fmtDate(inq.fecha_entrada)}</span></div>
+      <div class="detail-item"><label>Zonas</label><span>${inq.zonas||'—'}</span></div>
+      <div class="detail-item"><label>Tipo buscado</label><span>${inq.tipo||'Cualquiera'}</span></div>
+      <div class="detail-item"><label>Recámaras</label><span>${inq.recamaras||'—'}</span></div>
+      <div class="detail-item"><label>Mascotas</label><span>${inq.mascotas||'—'}</span></div>
+      <div class="detail-item"><label>Aval</label><span>${inq.aval||'—'}</span></div>
+      <div class="detail-item"><label>Ingresos aprox.</label><span>${fmtMXN(inq.ingresos)}</span></div>
+      <div class="detail-item"><label>Etapa</label><span>${inq.etapa||'nuevo'}</span></div>
+      <div class="detail-item"><label>Registrado</label><span>${fmtDate(inq.fecha_creacion)}</span></div>
+      ${inq.notas ? `<div class="detail-item" style="grid-column:1/-1"><label>Notas</label><span>${inq.notas}</span></div>` : ''}
+    </div>
+  `, `
+    <button class="btn btn-danger btn-sm" onclick="eliminarInquilino('${id}')">Eliminar</button>
+    <button class="btn btn-outline btn-sm" onclick="closeModal()">Cerrar</button>
+    <button class="btn btn-primary btn-sm" onclick="closeModal();modalNuevoInquilino('${id}')">Editar</button>
+  `, null);
+}
+
+function eliminarInquilino(id) {
+  if(!confirm('¿Eliminar este lead?')) return;
+  DB.inquilinos = DB.inquilinos.filter(x => x.id !== id);
+  closeModal(); renderInquilinos();
+}
+
+/* ══════════════════════════════════════════
+   EMBUDO KANBAN
+══════════════════════════════════════════ */
+function renderEmbudo() {
+  document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary btn-sm" onclick="modalNuevoInquilino()">+ Nuevo lead</button>`;
+  const inqs = DB.inquilinos;
+  const etapas = [
+    { id:'nuevo',       label:'Nuevos',          color:'#888780' },
+    { id:'calificado',  label:'Calificados',      color:'#378ADD' },
+    { id:'visita',      label:'Visita agendada',  color:'#EF9F27' },
+    { id:'negociacion', label:'Negociando',       color:'#BA7517' },
+    { id:'cerrado',     label:'Cerrados ✓',       color:'#1D9E75' },
+  ];
+
+  const cols = etapas.map(e => {
+    const cards = inqs.filter(i => (i.etapa||'nuevo') === e.id);
+    const cardsHTML = cards.length ? cards.map(i => `
+      <div class="kanban-card" onclick="verInquilino('${i.id}')">
+        <div class="kanban-card-name">${i.nombre}</div>
+        <div class="kanban-card-sub">${fmtMXN(i.presupuesto)}/mes</div>
+        <div class="kanban-card-tags">
+          ${i.zonas ? `<span class="badge badge-gray" style="font-size:10px">${i.zonas.split(',')[0].trim()}</span>` : ''}
+          ${i.mascotas==='si' ? `<span class="badge badge-amber" style="font-size:10px">🐾</span>` : ''}
+        </div>
+      </div>`).join('') : `<div style="padding:12px 4px;text-align:center;font-size:12px;color:var(--text3)">Sin leads</div>`;
+
+    return `<div class="kanban-col">
+      <div class="kanban-col-header">
+        <span class="kanban-col-title" style="color:${e.color}">${e.label}</span>
+        <span class="kanban-count">${cards.length}</span>
+      </div>
+      ${cardsHTML}
+    </div>`;
+  }).join('');
+
+  // también mostrar perdidos
+  const perdidos = inqs.filter(i => i.etapa === 'perdido');
+  const perdHTML = perdidos.length ? `
+    <div class="kanban-col" style="opacity:.6">
+      <div class="kanban-col-header">
+        <span class="kanban-col-title" style="color:#B03A2A">Perdidos</span>
+        <span class="kanban-count">${perdidos.length}</span>
+      </div>
+      ${perdidos.map(i => `<div class="kanban-card" onclick="verInquilino('${i.id}')"><div class="kanban-card-name">${i.nombre}</div><div class="kanban-card-sub">${fmtMXN(i.presupuesto)}/mes</div></div>`).join('')}
+    </div>` : '';
+
+  document.getElementById('content').innerHTML = `
+    <p style="font-size:13px;color:var(--text3);margin-bottom:16px">Haz clic en cualquier tarjeta para editar la etapa del lead.</p>
+    <div class="kanban">${cols}${perdHTML}</div>`;
+}
+
+/* ══════════════════════════════════════════
+   CONTRATOS
+══════════════════════════════════════════ */
+function renderContratos(search='') {
+  document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary btn-sm" onclick="modalNuevoContrato()">+ Nuevo contrato</button>`;
+  let data = DB.contratos;
+  if(search) data = data.filter(c => [c.inquilino_nombre,c.inmueble_dir].join(' ').toLowerCase().includes(search.toLowerCase()));
+
+  let rows = data.length ? data.map(c => {
+    const dias = daysUntil(c.vencimiento);
+    let vBadge = '';
+    if(dias !== null) {
+      if(dias < 0) vBadge = `<span class="badge badge-red">Vencido</span>`;
+      else if(dias <= 30) vBadge = `<span class="badge badge-amber">Vence en ${dias}d</span>`;
+      else vBadge = `<span class="badge badge-green">Vigente</span>`;
+    }
+    return `<tr onclick="verContrato('${c.id}')">
+      <td><strong>${c.inquilino_nombre||'—'}</strong></td>
+      <td class="muted">${c.inmueble_dir||'—'}</td>
+      <td>${fmtMXN(c.renta)}/mes</td>
+      <td class="muted">${fmtDate(c.fecha_inicio)}</td>
+      <td class="muted">${fmtDate(c.vencimiento)}</td>
+      <td>${vBadge}</td>
+      <td>${c.administrado ? '<span class="badge badge-green">Adm.</span>' : '<span class="badge badge-gray">Solo cierre</span>'}</td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="7"><div class="empty"><div class="empty-icon">◻</div><h4>Sin contratos</h4><p>Registra tu primer contrato cerrado</p><button class="btn btn-primary" onclick="modalNuevoContrato()">+ Agregar</button></div></td></tr>`;
+
+  document.getElementById('content').innerHTML = `
+    <div class="search-bar">
+      <input class="search-input" placeholder="Buscar contrato..." oninput="renderContratos(this.value)" value="${search}">
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Inquilino</th><th>Inmueble</th><th>Renta</th><th>Inicio</th><th>Vencimiento</th><th>Estado</th><th>Gestión</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function modalNuevoContrato(id=null) {
+  const c = id ? DB.contratos.find(x=>x.id===id) : {};
+  const inqs = DB.inquilinos;
+  const inms = DB.inmuebles;
+
+  openModal(id ? 'Editar contrato' : 'Nuevo contrato', `
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Inquilino <span class="req">*</span></label>
+        <select id="f-inq">
+          <option value="">— Selecciona —</option>
+          ${inqs.map(i => `<option value="${i.id}|${i.nombre}" ${c.inquilino_id===i.id?'selected':''}>${i.nombre}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Inmueble <span class="req">*</span></label>
+        <select id="f-inm">
+          <option value="">— Selecciona —</option>
+          ${inms.map(i => `<option value="${i.id}|${i.direccion}" ${c.inmueble_id===i.id?'selected':''}>${i.direccion}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Renta mensual pactada <span class="req">*</span></label>
+        <input id="f-renta" type="number" value="${c.renta||''}" placeholder="8000">
+      </div>
+      <div class="form-group">
+        <label>Depósito recibido</label>
+        <input id="f-dep" type="number" value="${c.deposito||''}" placeholder="8000">
+      </div>
+      <div class="form-group">
+        <label>Fecha inicio <span class="req">*</span></label>
+        <input id="f-inicio" type="date" value="${c.fecha_inicio||''}">
+      </div>
+      <div class="form-group">
+        <label>Fecha vencimiento <span class="req">*</span></label>
+        <input id="f-venc" type="date" value="${c.vencimiento||''}">
+      </div>
+      <div class="form-group">
+        <label>Incremento anual</label>
+        <input id="f-incr" value="${c.incremento||''}" placeholder="Ej. 5% o $400">
+      </div>
+      <div class="form-group">
+        <label>¿Bajo administración mensual?</label>
+        <select id="f-adm">
+          <option value="no" ${!c.administrado?'selected':''}>No — solo cierre</option>
+          <option value="si" ${c.administrado?'selected':''}>Sí — gestión mensual</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Comisión cobrada</label>
+        <input id="f-comision" type="number" value="${c.comision||''}" placeholder="8000">
+      </div>
+      <div class="form-group">
+        <label>¿Quién pagó la comisión?</label>
+        <select id="f-quien">
+          <option value="propietario" ${c.quien_pago==='propietario'?'selected':''}>Propietario</option>
+          <option value="inquilino" ${c.quien_pago==='inquilino'?'selected':''}>Inquilino</option>
+          <option value="ambos" ${c.quien_pago==='ambos'?'selected':''}>Ambos</option>
+        </select>
+      </div>
+      <div class="form-group form-full">
+        <label>Notas</label>
+        <textarea id="f-notas" placeholder="Condiciones especiales, acuerdos verbales...">${c.notas||''}</textarea>
+      </div>
+    </div>`, null, () => {
+    const inqVal  = document.getElementById('f-inq').value;
+    const inmVal  = document.getElementById('f-inm').value;
+    const renta   = document.getElementById('f-renta').value;
+    const inicio  = document.getElementById('f-inicio').value;
+    const venc    = document.getElementById('f-venc').value;
+    if(!inqVal||!inmVal||!renta||!inicio||!venc) { alert('Completa los campos obligatorios'); return; }
+    const [inqId, inqNombre] = inqVal.split('|');
+    const [inmId, inmDir]    = inmVal.split('|');
+    const administrado = document.getElementById('f-adm').value === 'si';
+    const obj = {
+      id: id||uid(),
+      inquilino_id: inqId, inquilino_nombre: inqNombre,
+      inmueble_id: inmId,  inmueble_dir: inmDir,
+      renta: Number(renta), deposito: document.getElementById('f-dep').value,
+      fecha_inicio: inicio, vencimiento: venc,
+      incremento: document.getElementById('f-incr').value,
+      administrado,
+      comision: Number(document.getElementById('f-comision').value)||0,
+      quien_pago: document.getElementById('f-quien').value,
+      notas: document.getElementById('f-notas').value.trim(),
+      fecha_creacion: id ? (c.fecha_creacion||today()) : today(),
+    };
+    let arr = DB.contratos;
+    if(id) arr = arr.map(x => x.id===id ? obj : x);
+    else {
+      arr.push(obj);
+      // marcar inmueble como rentado
+      DB.inmuebles = DB.inmuebles.map(i => i.id===inmId ? {...i, estado:'rentado'} : i);
+      // marcar inquilino como cerrado
+      DB.inquilinos = DB.inquilinos.map(i => i.id===inqId ? {...i, etapa:'cerrado'} : i);
+      // auto-registrar ingreso de comisión
+      if(obj.comision > 0) {
+        const ings = DB.ingresos;
+        ings.push({ id:uid(), tipo:'comision', monto:obj.comision, concepto:`Comisión cierre — ${inqNombre}`, fecha:today() });
+        DB.ingresos = ings;
+      }
+    }
+    DB.contratos = arr;
+    closeModal(); renderContratos();
+  });
+}
+
+function verContrato(id) {
+  const c = DB.contratos.find(x => x.id === id);
+  if(!c) return;
+  const dias = daysUntil(c.vencimiento);
+  let vTag = '';
+  if(dias !== null) {
+    if(dias < 0) vTag = `<span class="badge badge-red">Vencido hace ${Math.abs(dias)} días</span>`;
+    else if(dias <= 30) vTag = `<span class="badge badge-amber">Vence en ${dias} días</span>`;
+    else vTag = `<span class="badge badge-green">Vigente · ${dias} días restantes</span>`;
+  }
+  openModal(`Contrato: ${c.inquilino_nombre}`, `
+    <div style="margin-bottom:12px">${vTag}</div>
+    <div class="detail-grid">
+      <div class="detail-item"><label>Inquilino</label><span>${c.inquilino_nombre}</span></div>
+      <div class="detail-item"><label>Inmueble</label><span>${c.inmueble_dir}</span></div>
+      <div class="detail-item"><label>Renta mensual</label><span>${fmtMXN(c.renta)}</span></div>
+      <div class="detail-item"><label>Depósito</label><span>${fmtMXN(c.deposito)}</span></div>
+      <div class="detail-item"><label>Inicio</label><span>${fmtDate(c.fecha_inicio)}</span></div>
+      <div class="detail-item"><label>Vencimiento</label><span>${fmtDate(c.vencimiento)}</span></div>
+      <div class="detail-item"><label>Incremento anual</label><span>${c.incremento||'—'}</span></div>
+      <div class="detail-item"><label>Administración</label><span>${c.administrado?'Sí':'No'}</span></div>
+      <div class="detail-item"><label>Comisión cobrada</label><span>${fmtMXN(c.comision)}</span></div>
+      <div class="detail-item"><label>Pagó comisión</label><span>${c.quien_pago||'—'}</span></div>
+      ${c.notas ? `<div class="detail-item" style="grid-column:1/-1"><label>Notas</label><span>${c.notas}</span></div>` : ''}
+    </div>
+  `, `
+    <button class="btn btn-danger btn-sm" onclick="eliminarContrato('${id}')">Eliminar</button>
+    <button class="btn btn-outline btn-sm" onclick="closeModal()">Cerrar</button>
+    <button class="btn btn-primary btn-sm" onclick="closeModal();modalNuevoContrato('${id}')">Editar</button>
+  `, null);
+}
+
+function eliminarContrato(id) {
+  if(!confirm('¿Eliminar este contrato?')) return;
+  DB.contratos = DB.contratos.filter(x => x.id !== id);
+  closeModal(); renderContratos();
+}
+
+/* ══════════════════════════════════════════
+   INGRESOS
+══════════════════════════════════════════ */
+function renderIngresos() {
+  document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-primary btn-sm" onclick="modalNuevoIngreso()">+ Registrar ingreso</button>`;
+  const data = DB.ingresos.slice().sort((a,b) => (b.fecha||'').localeCompare(a.fecha||''));
+
+  const total        = data.reduce((s,i) => s + (Number(i.monto)||0), 0);
+  const comisiones   = data.filter(i=>i.tipo==='comision').reduce((s,i) => s+(Number(i.monto)||0), 0);
+  const administracion = data.filter(i=>i.tipo==='administracion').reduce((s,i) => s+(Number(i.monto)||0), 0);
+  const otros        = data.filter(i=>i.tipo==='otro').reduce((s,i) => s+(Number(i.monto)||0), 0);
+
+  const tipoBadge = { comision:'badge-amber', administracion:'badge-green', renovacion:'badge-blue', otro:'badge-gray' };
+  const tipoLabel = { comision:'Comisión cierre', administracion:'Adm. mensual', renovacion:'Renovación', otro:'Otro' };
+
+  let rows = data.length ? data.map(i => `
+    <tr onclick="eliminarIngresoConfirm('${i.id}')">
+      <td class="muted">${fmtDate(i.fecha)}</td>
+      <td><span class="badge ${tipoBadge[i.tipo]||'badge-gray'}">${tipoLabel[i.tipo]||i.tipo}</span></td>
+      <td>${i.concepto||'—'}</td>
+      <td><strong>${fmtMXN(i.monto)}</strong></td>
+    </tr>`).join('') : `<tr><td colspan="4"><div class="empty"><div class="empty-icon">◎</div><h4>Sin ingresos</h4><p>Los ingresos se registran automáticamente al cerrar contratos, o puedes agregarlos manualmente</p></div></td></tr>`;
+
+  document.getElementById('content').innerHTML = `
+    <div class="stats-grid" style="margin-bottom:24px">
+      <div class="stat-card stat-accent"><div class="stat-label">Total ingresos</div><div class="stat-val">${fmtMXN(total)}</div><div class="stat-sub">Acumulado</div></div>
+      <div class="stat-card stat-amber"><div class="stat-label">Comisiones</div><div class="stat-val">${fmtMXN(comisiones)}</div><div class="stat-sub">Por cierres</div></div>
+      <div class="stat-card"><div class="stat-label">Administración</div><div class="stat-val">${fmtMXN(administracion)}</div><div class="stat-sub">Gestión mensual</div></div>
+      <div class="stat-card"><div class="stat-label">Otros</div><div class="stat-val">${fmtMXN(otros)}</div><div class="stat-sub">Renovaciones y más</div></div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Monto</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--text3);margin-top:12px">Haz clic en una fila para eliminar el registro.</p>`;
+}
+
+function modalNuevoIngreso() {
+  openModal('Registrar ingreso', `
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Tipo <span class="req">*</span></label>
+        <select id="f-tipo">
+          <option value="comision">Comisión por cierre</option>
+          <option value="administracion">Administración mensual</option>
+          <option value="renovacion">Renovación de contrato</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Monto ($) <span class="req">*</span></label>
+        <input id="f-monto" type="number" placeholder="8000">
+      </div>
+      <div class="form-group form-full">
+        <label>Concepto / descripción</label>
+        <input id="f-concepto" placeholder="Ej. Comisión cierre Calle Robles 45">
+      </div>
+      <div class="form-group">
+        <label>Fecha</label>
+        <input id="f-fecha" type="date" value="${today()}">
+      </div>
+    </div>`, null, () => {
+    const monto = Number(document.getElementById('f-monto').value);
+    if(!monto) { alert('El monto es obligatorio'); return; }
+    const obj = {
+      id: uid(),
+      tipo: document.getElementById('f-tipo').value,
+      monto,
+      concepto: document.getElementById('f-concepto').value.trim(),
+      fecha: document.getElementById('f-fecha').value || today(),
+    };
+    const arr = DB.ingresos;
+    arr.push(obj);
+    DB.ingresos = arr;
+    closeModal(); renderIngresos();
+  });
+}
+
+function eliminarIngresoConfirm(id) {
+  if(!confirm('¿Eliminar este registro de ingreso?')) return;
+  DB.ingresos = DB.ingresos.filter(x => x.id !== id);
+  renderIngresos();
+}
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+navigate('dashboard');
+</script>
+</body>
+</html>
